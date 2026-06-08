@@ -787,7 +787,12 @@ footer{border-top:1px solid var(--border);padding:4rem 4rem 2rem}
     <a href="#" id="nl-contact" onclick="goto('contact');return false">Contact</a>
   </div>
   <div style="display:flex;align-items:center;gap:.75rem">
-    <button class="nav-signin-btn" onclick="openAuth()">Sign In</button>
+    <button class="nav-signin-btn" id="nav-signin" onclick="openAuth()">Sign In</button>
+    <div id="nav-user" style="display:none;align-items:center;gap:.75rem">
+      <div id="nav-user-avatar" style="width:32px;height:32px;border-radius:50%;background:var(--gold);color:var(--void);font-family:var(--display);font-weight:700;font-size:.85rem;display:flex;align-items:center;justify-content:center;border:1px solid rgba(201,168,76,.4)">A</div>
+      <span id="nav-user-name" style="font-family:var(--mono);font-size:.65rem;letter-spacing:.08em;color:var(--silver)"></span>
+      <button onclick="doSignOut()" style="font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;padding:.45rem .9rem;border:1px solid rgba(255,255,255,.1);color:var(--muted);background:transparent;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='rgba(255,255,255,.1)';this.style.color='var(--muted)'">Sign Out</button>
+    </div>
     <button class="nav-cta-btn" onclick="goto('contact');return false">Get a Quote</button>
   </div>
 </nav>
@@ -1570,7 +1575,7 @@ footer{border-top:1px solid var(--border);padding:4rem 4rem 2rem}
         <div class="legal-section">
           <div class="legal-h2">1. Overview</div>
           <div class="legal-p">1S Enterprises LLC ("1S Enterprises," "we," "us," or "our"), a limited liability company registered in the State of New York (LLC Reg. No. 6741892), is committed to protecting the privacy and security of personal data entrusted to us by our clients, prospects, and website visitors.</div>
-          <div class="legal-p">This Privacy Policy describes how we collect, use, disclose, and protect personal information in connection with our cloud infrastructure services and the operation of our website at 1senterprisesllc.com. It applies to all individuals whose personal data we process in our capacity as a Data Controller.</div>
+          <div class="legal-p">This Privacy Policy describes how we collect, use, disclose, and protect personal information in connection with our cloud infrastructure services and the operation of our website at 1centprises.com. It applies to all individuals whose personal data we process in our capacity as a Data Controller.</div>
           <div class="legal-p">This policy complies with the General Data Protection Regulation (GDPR), the California Consumer Privacy Act (CCPA), and applicable US federal and state privacy laws.</div>
         </div>
         <div class="legal-section">
@@ -1981,191 +1986,51 @@ footer{border-top:1px solid var(--border);padding:4rem 4rem 2rem}
   </div>
 </footer>
 
-<script>
-// ── CURSOR
-const cur=document.getElementById('cur'),ring=document.getElementById('cur-ring');
-let mx=0,my=0,rx=0,ry=0;
-document.addEventListener('mousemove',e=>{
-  mx=e.clientX;my=e.clientY;
-  cur.style.left=mx+'px';cur.style.top=my+'px';
-});
-(function loop(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop)})();
-document.querySelectorAll('a,button,.svc-card,.price-card,.testi-card,.sb,.fq-btn').forEach(el=>{
-  el.addEventListener('mouseenter',()=>{cur.classList.add('big');ring.classList.add('big')});
-  el.addEventListener('mouseleave',()=>{cur.classList.remove('big');ring.classList.remove('big')});
-});
-
-// ── NAV SCROLL
-window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',scrollY>50)});
-
-// ── ROUTING
-function goto(p){
-  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
-  const pg=document.getElementById('p-'+p);
-  if(pg)pg.classList.add('active');
-  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
-  const nl=document.getElementById('nl-'+p);
-  if(nl)nl.classList.add('active');
-  // highlight parent nav for sub-pages
-  const parentMap={privacy:'about',terms:'about',dpa:'about',sla:'support',status:'support'};
-  if(parentMap[p]){const pnl=document.getElementById('nl-'+parentMap[p]);if(pnl)pnl.classList.add('active')}
-  window.scrollTo({top:0,behavior:'instant'});
-}
-
-// ── FAQ
-function faq(btn){
-  const item=btn.parentElement;
-  const ans=item.querySelector('.fq-ans');
-  const was=item.classList.contains('open');
-  document.querySelectorAll('.fq-item.open').forEach(i=>{i.classList.remove('open');i.querySelector('.fq-ans').classList.remove('open')});
-  if(!was){item.classList.add('open');ans.classList.add('open')}
-}
-
-// ── FORM SUBMIT
-function submitForm(){
-  const name=document.getElementById('ff').value.trim();
-  const email=document.getElementById('fe').value.trim();
-  const service=document.getElementById('fs').value;
-  if(!name||!email||!service){
-    alert('Please fill in your first name, email address, and service interest.');
-    return;
-  }
-  document.getElementById('form-wrap').style.display='none';
-  document.getElementById('form-ok').classList.add('show');
-}
-</script>
 <!-- ═══════════ AUTH MODAL ═══════════ -->
 <style>
-.auth-overlay{
-  position:fixed;inset:0;z-index:5000;
-  background:rgba(2,3,10,.75);
-  backdrop-filter:blur(12px);
-  display:flex;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;
-  transition:opacity .3s;
-}
+.sso-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:.75rem;padding:.72rem 1rem;background:rgba(255,255,255,.03);border:1px solid var(--border-bright);color:var(--platinum);cursor:pointer;font-family:var(--body);font-size:.83rem;font-weight:400;letter-spacing:.02em;transition:all .2s;}
+.sso-btn:hover{background:rgba(255,255,255,.07);border-color:rgba(201,168,76,.3)}
+.idp-badge{display:inline-flex;align-items:center;gap:.35rem;font-family:var(--mono);font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px solid var(--border);padding:.22rem .55rem;}
+.auth-overlay{position:fixed;inset:0;z-index:5000;background:rgba(2,3,10,.78);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;padding:1.5rem;}
 .auth-overlay.open{opacity:1;pointer-events:all}
-.auth-modal{
-  width:100%;max-width:420px;
-  background:var(--surface);
-  border:1px solid var(--border-bright);
-  position:relative;
-  transform:translateY(20px) scale(.97);
-  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
-  overflow:hidden;
-}
+.auth-modal{width:100%;max-width:440px;max-height:88vh;overflow-y:auto;background:var(--surface);border:1px solid var(--border-bright);position:relative;transform:translateY(20px) scale(.97);transition:transform .35s cubic-bezier(.34,1.56,.64,1);scrollbar-width:thin;scrollbar-color:var(--gold) transparent;}
+.auth-modal::-webkit-scrollbar{width:2px}
+.auth-modal::-webkit-scrollbar-thumb{background:var(--gold)}
 .auth-overlay.open .auth-modal{transform:translateY(0) scale(1)}
-.auth-top-bar{
-  height:2px;
-  background:linear-gradient(90deg,var(--gold),var(--gold-light),transparent);
-}
+.auth-top-bar{height:2px;background:linear-gradient(90deg,var(--gold),var(--gold-light),transparent);}
 .auth-inner{padding:2.25rem 2.5rem 2.5rem}
-.auth-close{
-  position:absolute;top:1rem;right:1rem;
-  background:none;border:none;cursor:pointer;
-  font-family:var(--mono);font-size:.9rem;
-  color:var(--muted);transition:color .2s;line-height:1;
-  padding:.25rem .4rem;
-}
+.auth-close{position:absolute;top:1rem;right:1rem;background:none;border:none;cursor:pointer;font-family:var(--mono);font-size:.9rem;color:var(--muted);transition:color .2s;line-height:1;padding:.25rem .4rem;}
 .auth-close:hover{color:var(--platinum)}
-.auth-logo{
-  display:flex;align-items:center;gap:.6rem;
-  margin-bottom:1.75rem;
-}
-.auth-logo-mark{
-  width:26px;height:26px;border:1px solid var(--gold);
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--mono);font-size:.58rem;color:var(--gold);
-}
-.auth-logo-name{
-  font-family:var(--display);font-weight:500;font-size:1rem;
-  color:var(--platinum);letter-spacing:.04em;
-}
-.auth-tabs{
-  display:flex;gap:0;border-bottom:1px solid var(--border);
-  margin-bottom:1.75rem;
-}
-.auth-tab{
-  font-family:var(--body);font-weight:400;font-size:.82rem;
-  letter-spacing:.06em;padding:.65rem 1.5rem .65rem 0;
-  background:none;border:none;cursor:pointer;
-  color:var(--muted);transition:color .2s;
-  position:relative;
-}
+.auth-logo{display:flex;align-items:center;gap:.6rem;margin-bottom:1.75rem;}
+.auth-logo-mark{width:26px;height:26px;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.58rem;color:var(--gold);}
+.auth-logo-name{font-family:var(--display);font-weight:500;font-size:1rem;color:var(--platinum);letter-spacing:.04em;}
+.auth-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1.75rem;}
+.auth-tab{font-family:var(--body);font-weight:400;font-size:.82rem;letter-spacing:.06em;padding:.65rem 1.5rem .65rem 0;background:none;border:none;cursor:pointer;color:var(--muted);transition:color .2s;position:relative;}
 .auth-tab.active{color:var(--platinum)}
-.auth-tab.active::after{
-  content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;
-  background:var(--gold);
-}
+.auth-tab.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:var(--gold);}
 .auth-form{display:flex;flex-direction:column;gap:.9rem}
 .auth-form.hidden{display:none}
 .auth-field{display:flex;flex-direction:column;gap:.35rem}
-.auth-label{
-  font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--muted);
-}
-.auth-input{
-  background:rgba(255,255,255,.03);
-  border:1px solid var(--border);
-  color:var(--platinum);padding:.75rem 1rem;
-  font-family:var(--body);font-size:.88rem;font-weight:300;
-  outline:none;transition:border-color .2s;width:100%;
-}
+.auth-label{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+.auth-input{background:rgba(255,255,255,.03);border:1px solid var(--border);color:var(--platinum);padding:.75rem 1rem;font-family:var(--body);font-size:.88rem;font-weight:300;outline:none;transition:border-color .2s;width:100%;}
 .auth-input:focus{border-color:rgba(201,168,76,.5)}
 .auth-input::placeholder{color:var(--dim)}
-.auth-divider{
-  display:flex;align-items:center;gap:.75rem;
-  margin:.1rem 0;
-}
-.auth-divider::before,.auth-divider::after{
-  content:'';flex:1;height:1px;background:var(--border);
-}
-.auth-divider span{
-  font-family:var(--mono);font-size:.55rem;letter-spacing:.1em;
-  color:var(--dim);text-transform:uppercase;
-}
-.auth-submit{
-  font-family:var(--body);font-weight:500;font-size:.78rem;
-  letter-spacing:.1em;text-transform:uppercase;
-  padding:.85rem;width:100%;
-  background:linear-gradient(135deg,var(--gold),var(--gold-light));
-  color:var(--void);border:none;cursor:pointer;
-  transition:opacity .2s,transform .15s;margin-top:.25rem;
-}
+.auth-divider{display:flex;align-items:center;gap:.75rem;margin:.1rem 0;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.auth-divider span{font-family:var(--mono);font-size:.55rem;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;}
+.auth-submit{font-family:var(--body);font-weight:500;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;padding:.85rem;width:100%;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--void);border:none;cursor:pointer;transition:opacity .2s,transform .15s;margin-top:.25rem;}
 .auth-submit:hover{opacity:.88;transform:translateY(-1px)}
-.auth-footer{
-  font-size:.78rem;color:var(--muted);text-align:center;
-  margin-top:1.25rem;font-weight:300;
-}
+.auth-footer{font-size:.78rem;color:var(--muted);text-align:center;margin-top:1.25rem;font-weight:300;}
 .auth-footer a{color:var(--gold);text-decoration:none;cursor:pointer}
 .auth-footer a:hover{text-decoration:underline}
-.auth-msg{
-  font-family:var(--mono);font-size:.65rem;letter-spacing:.06em;
-  text-align:center;padding:.6rem;margin-top:.5rem;
-  display:none;
-}
-.auth-msg.success{
-  background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.2);
-  color:#4CAF50;display:block;
-}
-.auth-msg.error{
-  background:rgba(255,61,107,.08);border:1px solid rgba(255,61,107,.2);
-  color:var(--rose);display:block;
-}
+.auth-msg{font-family:var(--mono);font-size:.65rem;letter-spacing:.06em;text-align:center;padding:.6rem;margin-top:.5rem;display:none;}
+.auth-msg.success{background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.2);color:#4CAF50;display:block;}
+.auth-msg.error{background:rgba(255,61,107,.08);border:1px solid rgba(255,61,107,.2);color:var(--rose);display:block;}
 .auth-pwd-wrap{position:relative}
 .auth-pwd-wrap .auth-input{padding-right:2.75rem}
-.auth-eye{
-  position:absolute;right:.75rem;top:50%;transform:translateY(-50%);
-  background:none;border:none;cursor:pointer;
-  color:var(--muted);font-size:.85rem;transition:color .2s;padding:.2rem;
-}
+.auth-eye{position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:.85rem;transition:color .2s;padding:.2rem;}
 .auth-eye:hover{color:var(--silver)}
-.auth-forgot{
-  font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;
-  color:var(--muted);text-align:right;
-  text-decoration:none;transition:color .2s;cursor:pointer;
-  margin-top:-.4rem;display:block;
-}
+.auth-forgot{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;color:var(--muted);text-align:right;text-decoration:none;transition:color .2s;cursor:pointer;margin-top:-.4rem;display:block;}
 .auth-forgot:hover{color:var(--gold)}
 .auth-strength{height:2px;background:var(--border);margin-top:.4rem;overflow:hidden}
 .auth-strength-bar{height:100%;width:0;transition:width .3s,background .3s}
@@ -2176,12 +2041,10 @@ function submitForm(){
     <div class="auth-top-bar"></div>
     <div class="auth-inner">
       <button class="auth-close" onclick="closeAuth()">✕</button>
-
       <div class="auth-logo">
         <div class="auth-logo-mark">1S</div>
         <div class="auth-logo-name">1S Enterprises</div>
       </div>
-
       <div class="auth-tabs">
         <button class="auth-tab active" id="tab-in" onclick="switchTab('in')">Sign In</button>
         <button class="auth-tab" id="tab-up" onclick="switchTab('up')">Create Account</button>
@@ -2189,6 +2052,21 @@ function submitForm(){
 
       <!-- SIGN IN -->
       <div class="auth-form" id="form-in">
+        <div style="display:flex;flex-direction:column;gap:.6rem">
+          <button class="sso-btn" onclick="doSSO('google')">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            Continue with Google
+          </button>
+          <button class="sso-btn" onclick="doSSO('microsoft')">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path d="M11.4 2H2v9.4h9.4V2z" fill="#F25022"/><path d="M22 2h-9.4v9.4H22V2z" fill="#7FBA00"/><path d="M11.4 12.6H2V22h9.4v-9.4z" fill="#00A4EF"/><path d="M22 12.6h-9.4V22H22v-9.4z" fill="#FFB900"/></svg>
+            Continue with Microsoft
+          </button>
+          <button class="sso-btn" onclick="doSSO('linkedin')">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" fill="#0A66C2"/></svg>
+            Continue with LinkedIn
+          </button>
+        </div>
+        <div class="auth-divider"><span>or sign in with email</span></div>
         <div class="auth-field">
           <label class="auth-label">Business Email</label>
           <input type="email" class="auth-input" id="si-email" placeholder="you@company.com"/>
@@ -2205,31 +2083,32 @@ function submitForm(){
         </div>
         <div id="si-msg" class="auth-msg"></div>
         <button class="auth-submit" onclick="doSignIn()">Sign In to Portal</button>
-        <div class="auth-footer">
-          Don't have an account? <a onclick="switchTab('up')">Create one →</a>
+        <div style="border-top:1px solid var(--border);margin-top:1rem;padding-top:1rem;text-align:center">
+          <span style="font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Enterprise SSO?</span>
+          <a onclick="showSSODomain()" style="font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);cursor:pointer;margin-left:.5rem">Sign in with your domain →</a>
         </div>
+        <div class="auth-footer">Don't have an account? <a onclick="switchTab('up')">Create one →</a></div>
       </div>
 
       <!-- SIGN UP -->
       <div class="auth-form hidden" id="form-up">
+        <div style="display:flex;flex-direction:column;gap:.6rem">
+          <button class="sso-btn" onclick="doSSO('google')">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            Sign up with Google
+          </button>
+          <button class="sso-btn" onclick="doSSO('microsoft')">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path d="M11.4 2H2v9.4h9.4V2z" fill="#F25022"/><path d="M22 2h-9.4v9.4H22V2z" fill="#7FBA00"/><path d="M11.4 12.6H2V22h9.4v-9.4z" fill="#00A4EF"/><path d="M22 12.6h-9.4V22H22v-9.4z" fill="#FFB900"/></svg>
+            Sign up with Microsoft
+          </button>
+        </div>
+        <div class="auth-divider"><span>or create account with email</span></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
-          <div class="auth-field">
-            <label class="auth-label">First Name</label>
-            <input type="text" class="auth-input" id="su-fn" placeholder="John"/>
-          </div>
-          <div class="auth-field">
-            <label class="auth-label">Last Name</label>
-            <input type="text" class="auth-input" id="su-ln" placeholder="Smith"/>
-          </div>
+          <div class="auth-field"><label class="auth-label">First Name</label><input type="text" class="auth-input" id="su-fn" placeholder="John"/></div>
+          <div class="auth-field"><label class="auth-label">Last Name</label><input type="text" class="auth-input" id="su-ln" placeholder="Smith"/></div>
         </div>
-        <div class="auth-field">
-          <label class="auth-label">Business Email</label>
-          <input type="email" class="auth-input" id="su-email" placeholder="you@company.com"/>
-        </div>
-        <div class="auth-field">
-          <label class="auth-label">Company Name</label>
-          <input type="text" class="auth-input" id="su-co" placeholder="Acme Corp"/>
-        </div>
+        <div class="auth-field"><label class="auth-label">Business Email</label><input type="email" class="auth-input" id="su-email" placeholder="you@company.com"/></div>
+        <div class="auth-field"><label class="auth-label">Company Name</label><input type="text" class="auth-input" id="su-co" placeholder="Acme Corp"/></div>
         <div class="auth-field">
           <label class="auth-label">Password</label>
           <div class="auth-pwd-wrap">
@@ -2240,71 +2119,380 @@ function submitForm(){
         </div>
         <div id="su-msg" class="auth-msg"></div>
         <button class="auth-submit" onclick="doSignUp()">Create Account</button>
-        <div class="auth-footer">
-          By creating an account you agree to our
-          <a onclick="closeAuth();goto('terms')">Terms of Service</a> and
-          <a onclick="closeAuth();goto('privacy')">Privacy Policy</a>.
-        </div>
-        <div class="auth-footer" style="margin-top:.5rem">
-          Already have an account? <a onclick="switchTab('in')">Sign in →</a>
-        </div>
+        <div class="auth-footer">By creating an account you agree to our <a onclick="closeAuth();goto('terms')">Terms of Service</a> and <a onclick="closeAuth();goto('privacy')">Privacy Policy</a>.</div>
+        <div class="auth-footer" style="margin-top:.5rem">Already have an account? <a onclick="switchTab('in')">Sign in →</a></div>
       </div>
 
-      <!-- FORGOT PASSWORD (hidden initially) -->
+      <!-- FORGOT PASSWORD -->
       <div class="auth-form hidden" id="form-fg">
         <div style="font-family:var(--display);font-weight:400;font-size:1.1rem;color:var(--platinum);margin-bottom:.5rem">Reset password</div>
         <div style="font-size:.82rem;color:var(--silver);font-weight:300;margin-bottom:1rem;line-height:1.65">Enter your business email and we'll send a reset link within 5 minutes.</div>
-        <div class="auth-field">
-          <label class="auth-label">Business Email</label>
-          <input type="email" class="auth-input" id="fg-email" placeholder="you@company.com"/>
-        </div>
+        <div class="auth-field"><label class="auth-label">Business Email</label><input type="email" class="auth-input" id="fg-email" placeholder="you@company.com"/></div>
         <div id="fg-msg" class="auth-msg"></div>
         <button class="auth-submit" onclick="doForgot()">Send Reset Link</button>
-        <div class="auth-footer" style="margin-top:1rem">
-          <a onclick="switchTab('in')">← Back to Sign In</a>
+        <div class="auth-footer" style="margin-top:1rem"><a onclick="switchTab('in')">← Back to Sign In</a></div>
+      </div>
+
+      <!-- ENTERPRISE SSO DOMAIN -->
+      <div class="auth-form hidden" id="form-sso">
+        <div style="font-family:var(--display);font-weight:400;font-size:1.1rem;color:var(--platinum);margin-bottom:.3rem">Enterprise SSO</div>
+        <div style="font-size:.82rem;color:var(--silver);font-weight:300;margin-bottom:1.25rem;line-height:1.65">Enter your company email domain and we'll redirect you to your organisation's identity provider — Okta, Azure AD, Google Workspace, or any SAML 2.0 IdP.</div>
+        <div class="auth-field">
+          <label class="auth-label">Company Email Domain</label>
+          <div style="position:relative;display:flex;align-items:center">
+            <span style="position:absolute;left:1rem;font-family:var(--mono);font-size:.78rem;color:var(--muted);pointer-events:none">@</span>
+            <input type="text" class="auth-input" id="sso-domain" placeholder="yourcompany.com" style="padding-left:2rem"/>
+          </div>
         </div>
+        <div style="margin:.5rem 0">
+          <div style="font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem">Supported identity providers</div>
+          <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+            <span class="idp-badge">Okta</span>
+            <span class="idp-badge">Azure AD</span>
+            <span class="idp-badge">Google Workspace</span>
+            <span class="idp-badge">Ping Identity</span>
+            <span class="idp-badge">OneLogin</span>
+            <span class="idp-badge">SAML 2.0</span>
+            <span class="idp-badge">OIDC</span>
+          </div>
+        </div>
+        <div id="sso-msg" class="auth-msg"></div>
+        <button class="auth-submit" onclick="doSSODomain()">Continue with SSO →</button>
+        <div style="margin-top:.75rem;font-size:.78rem;color:var(--muted);text-align:center;font-weight:300">SSO not configured? <a onclick="closeAuth();goto('contact')" style="color:var(--gold);cursor:pointer">Contact us to set it up →</a></div>
+        <div class="auth-footer" style="margin-top:.75rem"><a onclick="switchTab('in')">← Back to Sign In</a></div>
       </div>
 
     </div>
   </div>
 </div>
 
-<script>
-// ── AUTH MODAL
-function openAuth(){document.getElementById('authOverlay').classList.add('open')}
-function closeAuth(){document.getElementById('authOverlay').classList.remove('open');clearMsgs()}
-function overlayClick(e){if(e.target===document.getElementById('authOverlay'))closeAuth()}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAuth()})
+<script type="module">
+// ══════════════════════════════════════════════════════════════
+//  FIREBASE CONFIGURATION
+//  ─────────────────────────────────────────────────────────────
+//  Replace the values below with your Firebase project config.
+//  Get them from: Firebase Console → Project Settings → Your apps
+// ══════════════════════════════════════════════════════════════
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js'
+import {
+  getAuth,
+  setPersistence,
+  browserLocalPersistence,
+  onAuthStateChanged,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  signOut,
+  GoogleAuthProvider,
+  OAuthProvider,
+  SAMLAuthProvider
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js'
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'
 
-function switchTab(t){
+// ── YOUR FIREBASE CONFIG ────────────────────────
+const firebaseConfig = {
+  apiKey:            "AIzaSyBptP4MMSi1LAl5EQI7YFjUknzamcgnYcQ",
+  authDomain:        "fir-enterprises-834c0.firebaseapp.com",
+  projectId:         "fir-enterprises-834c0",
+  storageBucket:     "fir-enterprises-834c0.firebasestorage.app",
+  messagingSenderId: "809544533699",
+  appId:             "1:809544533699:web:10b4b5c2144096a4f70476"
+}
+// ────────────────────────────────────────────────────────────
+
+const app  = initializeApp(firebaseConfig)
+const auth = getAuth(app)
+const db   = getFirestore(app)
+
+// Persist session across browser restarts
+await setPersistence(auth, browserLocalPersistence)
+
+// ── PROVIDERS ────────────────────────────────────────────────
+const googleProvider    = new GoogleAuthProvider()
+const microsoftProvider = new OAuthProvider('microsoft.com')
+microsoftProvider.setCustomParameters({ prompt: 'select_account', tenant: 'common' })
+// Note: LinkedIn SSO requires LinkedIn's own OAuth app + custom backend
+// Firebase does not natively support LinkedIn as an OAuthProvider
+// Clicking LinkedIn will prompt user to contact us for Enterprise SSO setup
+
+// ── AUTH STATE LISTENER ───────────────────────────────────────
+// Watches for login/logout and updates the nav in real time
+onAuthStateChanged(auth, user => {
+  const signinBtn  = document.getElementById('nav-signin')
+  const userWidget = document.getElementById('nav-user')
+  const userName   = document.getElementById('nav-user-name')
+  const userAvatar = document.getElementById('nav-user-avatar')
+
+  if (user) {
+    // User is signed in
+    if (signinBtn)  signinBtn.style.display  = 'none'
+    if (userWidget) userWidget.style.display = 'flex'
+    const displayName = user.displayName || user.email.split('@')[0]
+    if (userName)   userName.textContent = displayName
+    if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase()
+    closeAuth()
+  } else {
+    // User is signed out
+    if (signinBtn)  signinBtn.style.display  = 'inline-block'
+    if (userWidget) userWidget.style.display = 'none'
+  }
+})
+
+// ── SAVE USER PROFILE TO FIRESTORE ───────────────────────────
+async function saveUserProfile(user, extra = {}) {
+  try {
+    const ref  = doc(db, 'users', user.uid)
+    const snap = await getDoc(ref)
+    if (!snap.exists()) {
+      await setDoc(ref, {
+        uid:         user.uid,
+        email:       user.email,
+        displayName: user.displayName || '',
+        photoURL:    user.photoURL    || '',
+        provider:    user.providerData[0]?.providerId || 'email',
+        createdAt:   serverTimestamp(),
+        plan:        'free',
+        ...extra
+      })
+    }
+  } catch(e) { console.warn('Firestore write skipped:', e.message) }
+}
+
+// ── EMAIL / PASSWORD SIGN IN ─────────────────────────────────
+window.doSignIn = async function() {
+  const e = document.getElementById('si-email').value.trim()
+  const p = document.getElementById('si-pwd').value
+  if (!e || !p) { msg('si-msg','error','Please enter your email and password.'); return }
+  if (!e.includes('@')) { msg('si-msg','error','Please enter a valid email address.'); return }
+  msg('si-msg','success','Signing you in…')
+  try {
+    await signInWithEmailAndPassword(auth, e, p)
+    // onAuthStateChanged handles the rest
+  } catch(err) {
+    const m = {
+      'auth/user-not-found':    'No account found with this email.',
+      'auth/wrong-password':    'Incorrect password. Try again.',
+      'auth/invalid-email':     'Please enter a valid email address.',
+      'auth/too-many-requests': 'Too many attempts. Please wait and try again.',
+      'auth/invalid-credential':'Invalid email or password.'
+    }
+    msg('si-msg','error', m[err.code] || 'Sign in failed. Please try again.')
+  }
+}
+
+// ── EMAIL / PASSWORD SIGN UP ─────────────────────────────────
+window.doSignUp = async function() {
+  const fn = document.getElementById('su-fn').value.trim()
+  const ln = document.getElementById('su-ln').value.trim()
+  const e  = document.getElementById('su-email').value.trim()
+  const co = document.getElementById('su-co').value.trim()
+  const p  = document.getElementById('su-pwd').value
+  if (!fn||!ln||!e||!co) { msg('su-msg','error','Please fill in all required fields.'); return }
+  if (!e.includes('@'))  { msg('su-msg','error','Please enter a valid business email.'); return }
+  if (p.length < 8)      { msg('su-msg','error','Password must be at least 8 characters.'); return }
+  msg('su-msg','success','Creating your account…')
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, e, p)
+    await saveUserProfile(cred.user, { firstName: fn, lastName: ln, company: co })
+    msg('su-msg','success','✓ Account created — welcome to 1S Enterprises!')
+  } catch(err) {
+    const m = {
+      'auth/email-already-in-use': 'An account with this email already exists.',
+      'auth/invalid-email':        'Please enter a valid email address.',
+      'auth/weak-password':        'Password must be at least 8 characters.'
+    }
+    msg('su-msg','error', m[err.code] || 'Sign up failed. Please try again.')
+  }
+}
+
+// ── FORGOT PASSWORD ──────────────────────────────────────────
+window.doForgot = async function() {
+  const e = document.getElementById('fg-email').value.trim()
+  if (!e || !e.includes('@')) { msg('fg-msg','error','Please enter a valid email address.'); return }
+  msg('fg-msg','success','Sending reset link…')
+  try {
+    await sendPasswordResetEmail(auth, e)
+    msg('fg-msg','success','✓ Reset link sent — check your inbox within 5 minutes.')
+    setTimeout(() => switchTab('in'), 3000)
+  } catch(err) {
+    const m = {
+      'auth/user-not-found': 'No account found with this email.',
+      'auth/invalid-email':  'Please enter a valid email address.'
+    }
+    msg('fg-msg','error', m[err.code] || 'Could not send reset email. Please try again.')
+  }
+}
+
+// ── SSO — GOOGLE / MICROSOFT / LINKEDIN ──────────────────────
+window.doSSO = async function(provider) {
+  const activeMsg = document.getElementById('form-in').classList.contains('hidden') ? 'su-msg' : 'si-msg'
+  const names = { google:'Google', microsoft:'Microsoft', linkedin:'LinkedIn' }
+
+  // LinkedIn not natively supported by Firebase — redirect to contact
+  if (provider === 'linkedin') {
+    msg(activeMsg,'success','↗ LinkedIn SSO requires Enterprise setup — redirecting to contact...')
+    setTimeout(()=>{ closeAuth(); goto('contact') }, 1800)
+    return
+  }
+
+  const providerMap = {
+    google:    googleProvider,
+    microsoft: microsoftProvider,
+  }
+  msg(activeMsg,'success',`Redirecting to ${names[provider]}…`)
+  try {
+    const result = await signInWithPopup(auth, providerMap[provider])
+    await saveUserProfile(result.user)
+    // onAuthStateChanged closes modal + updates nav
+  } catch(err) {
+    if (err.code === 'auth/popup-closed-by-user') {
+      msg(activeMsg,'error','Sign-in window was closed. Please try again.')
+    } else if (err.code === 'auth/popup-blocked') {
+      msg(activeMsg,'error','Popup was blocked. Please allow popups for this site.')
+    } else {
+      msg(activeMsg,'error', `${names[provider]} sign-in failed. Please try again.`)
+    }
+  }
+}
+
+// ── ENTERPRISE SAML SSO ───────────────────────────────────────
+// Requires Firebase Identity Platform (paid tier)
+// Client's IT team provides: Entity ID, SSO URL, X.509 Certificate
+// Configure in: Firebase Console → Authentication → Sign-in method → SAML
+window.doSSODomain = async function() {
+  const d = document.getElementById('sso-domain').value.trim().toLowerCase().replace('@','')
+  if (!d || !d.includes('.')) {
+    msg('sso-msg','error','Please enter a valid company domain (e.g. yourcompany.com)')
+    return
+  }
+  msg('sso-msg','success',`Looking up SSO configuration for ${d}…`)
+
+  // Map known enterprise domains to their SAML provider ID
+  // Add your clients' domains here after configuring in Firebase
+  const samlMap = {
+    // 'acmecorp.com':   'saml.acmecorp-okta',
+    // 'enterprise.com': 'saml.enterprise-azuread',
+  }
+
+  const providerId = samlMap[d]
+  if (!providerId) {
+    // Domain not yet configured — redirect to contact
+    setTimeout(() => {
+      msg('sso-msg','error',`SSO not yet configured for ${d}. Contact us to set it up.`)
+    }, 1000)
+    return
+  }
+
+  try {
+    const samlProvider = new SAMLAuthProvider(providerId)
+    const result = await signInWithPopup(auth, samlProvider)
+    await saveUserProfile(result.user)
+  } catch(err) {
+    msg('sso-msg','error','SAML authentication failed. Contact your IT administrator.')
+    console.error('SAML error:', err)
+  }
+}
+
+// ── SIGN OUT ─────────────────────────────────────────────────
+window.doSignOut = async function() {
+  try {
+    await signOut(auth)
+  } catch(e) { console.error('Sign out error:', e) }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  NON-AUTH FUNCTIONS (cursor, routing, FAQ, form)
+// ══════════════════════════════════════════════════════════════
+
+// ── CURSOR ───────────────────────────────────────────────────
+const cur  = document.getElementById('cur')
+const ring = document.getElementById('cur-ring')
+let mx=0,my=0,rx=0,ry=0
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px'})
+;(function loop(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop)})()
+document.querySelectorAll('a,button,.svc-card,.price-card,.testi-card,.sb,.fq-btn').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.classList.add('big');ring.classList.add('big')})
+  el.addEventListener('mouseleave',()=>{cur.classList.remove('big');ring.classList.remove('big')})
+})
+
+// ── NAV SCROLL ───────────────────────────────────────────────
+window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',scrollY>50)})
+
+// ── ROUTING ──────────────────────────────────────────────────
+window.goto = function(p) {
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'))
+  const pg = document.getElementById('p-'+p)
+  if(pg) pg.classList.add('active')
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'))
+  const nl = document.getElementById('nl-'+p)
+  if(nl) nl.classList.add('active')
+  const parentMap = {privacy:'about',terms:'about',dpa:'about',sla:'support',status:'support'}
+  if(parentMap[p]){const pnl=document.getElementById('nl-'+parentMap[p]);if(pnl)pnl.classList.add('active')}
+  window.scrollTo({top:0,behavior:'instant'})
+}
+
+// ── FAQ ───────────────────────────────────────────────────────
+window.faq = function(btn) {
+  const item = btn.parentElement
+  const ans  = item.querySelector('.fq-ans')
+  const was  = item.classList.contains('open')
+  document.querySelectorAll('.fq-item.open').forEach(i=>{i.classList.remove('open');i.querySelector('.fq-ans').classList.remove('open')})
+  if(!was){item.classList.add('open');ans.classList.add('open')}
+}
+
+// ── CONTACT FORM ──────────────────────────────────────────────
+window.submitForm = function() {
+  const name    = document.getElementById('ff').value.trim()
+  const email   = document.getElementById('fe').value.trim()
+  const service = document.getElementById('fs').value
+  if(!name||!email||!service){alert('Please fill in your first name, email address, and service interest.');return}
+  document.getElementById('form-wrap').style.display = 'none'
+  document.getElementById('form-ok').classList.add('show')
+}
+
+// ── AUTH MODAL HELPERS ────────────────────────────────────────
+window.openAuth  = function(){ document.getElementById('authOverlay').classList.add('open') }
+window.closeAuth = function(){ document.getElementById('authOverlay').classList.remove('open');clearMsgs() }
+window.overlayClick = function(e){ if(e.target===document.getElementById('authOverlay'))closeAuth() }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeAuth() })
+
+window.switchTab = function(t) {
   document.getElementById('tab-in').classList.toggle('active',t==='in')
   document.getElementById('tab-up').classList.toggle('active',t==='up')
   document.getElementById('form-in').classList.toggle('hidden',t!=='in')
   document.getElementById('form-up').classList.toggle('hidden',t!=='up')
   document.getElementById('form-fg').classList.add('hidden')
+  document.getElementById('form-sso').classList.add('hidden')
   clearMsgs()
 }
-function showForgot(){
-  document.getElementById('form-in').classList.add('hidden')
-  document.getElementById('form-fg').classList.remove('hidden')
-}
+window.showForgot    = function(){ document.getElementById('form-in').classList.add('hidden');document.getElementById('form-fg').classList.remove('hidden') }
+window.showSSODomain = function(){ document.getElementById('form-in').classList.add('hidden');document.getElementById('form-sso').classList.remove('hidden') }
+
 function clearMsgs(){
-  ['si-msg','su-msg','fg-msg'].forEach(id=>{
+  ['si-msg','su-msg','fg-msg','sso-msg'].forEach(id=>{
     const el=document.getElementById(id)
-    el.className='auth-msg';el.textContent=''
+    if(el){el.className='auth-msg';el.textContent=''}
   })
 }
 function msg(id,type,text){
   const el=document.getElementById(id)
-  el.className='auth-msg '+type;el.textContent=text
+  if(el){el.className='auth-msg '+type;el.textContent=text}
 }
-function togglePwd(id,btn){
+window.togglePwd = function(id,btn){
   const inp=document.getElementById(id)
   inp.type=inp.type==='password'?'text':'password'
   btn.textContent=inp.type==='password'?'👁':'🙈'
 }
-function checkStrength(v){
+window.checkStrength = function(v){
   const bar=document.getElementById('strength-bar')
+  if(!bar)return
   let s=0
   if(v.length>=8)s++
   if(/[A-Z]/.test(v))s++
@@ -2313,33 +2501,6 @@ function checkStrength(v){
   const w=['0%','30%','55%','75%','100%'][s]
   const c=['','#e53935','#fb8c00','#fdd835','#43a047'][s]
   bar.style.width=w;bar.style.background=c
-}
-function doSignIn(){
-  const e=document.getElementById('si-email').value.trim()
-  const p=document.getElementById('si-pwd').value
-  if(!e||!p){msg('si-msg','error','Please enter your email and password.');return}
-  if(!e.includes('@')){msg('si-msg','error','Please enter a valid email address.');return}
-  // Simulate auth — replace with real API call
-  msg('si-msg','success','✓ Signing you in...')
-  setTimeout(()=>closeAuth(),1800)
-}
-function doSignUp(){
-  const fn=document.getElementById('su-fn').value.trim()
-  const ln=document.getElementById('su-ln').value.trim()
-  const e=document.getElementById('su-email').value.trim()
-  const co=document.getElementById('su-co').value.trim()
-  const p=document.getElementById('su-pwd').value
-  if(!fn||!ln||!e||!co){msg('su-msg','error','Please fill in all required fields.');return}
-  if(!e.includes('@')){msg('su-msg','error','Please enter a valid business email.');return}
-  if(p.length<8){msg('su-msg','error','Password must be at least 8 characters.');return}
-  msg('su-msg','success','✓ Account created — check your email to verify.')
-  setTimeout(()=>closeAuth(),2200)
-}
-function doForgot(){
-  const e=document.getElementById('fg-email').value.trim()
-  if(!e||!e.includes('@')){msg('fg-msg','error','Please enter a valid email address.');return}
-  msg('fg-msg','success','✓ Reset link sent — check your inbox.')
-  setTimeout(()=>switchTab('in'),2500)
 }
 </script>
 </body>
